@@ -1,6 +1,4 @@
-﻿using NUnit.Framework;
-
-namespace Blocks
+﻿namespace Blocks
 {
     internal class Program
     {
@@ -35,10 +33,9 @@ namespace Blocks
         {
             int[] input = args.Select(int.Parse).ToArray();
             bool found = false;
-            PrintAllLegalBlocks();
             foreach (var legalBlock in GetAllLegalBlocks())
             {
-                var view = AllView(legalBlock);
+                var view = GetView(legalBlock);
                 if (IsEqualView(view, input))
                 {
                     PrintBlock(legalBlock);
@@ -64,18 +61,6 @@ namespace Blocks
                 i++;
             }
             return true;
-        }
-
-        private static void PrintAllLegalBlocks()
-        {
-            int count = 0;
-            foreach (var candidateBlock in GetAllLegalBlocks())
-            {
-                count++;
-                PrintBlock(candidateBlock);
-                Console.WriteLine();
-            }
-            Console.WriteLine($"Found {count} legal blocks");
         }
 
         private static void PrintBlock(int[,] candidateBlock)
@@ -135,37 +120,7 @@ namespace Blocks
             return true;
         }
 
-        private int[,] CombineRows(int[] rows)
-        {
-            var result = new int[4, 4];
-            for (int i = 0; i < 4; i++)
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    result[i, j] = Combinations[rows[i * 4 + j]][j];
-                }
-            }
-            return result;
-        }
-
-        private static int View(int[] row)
-        {
-            int numView = 0;
-            int maxView = 0;
-            int index = 0;
-            while (index < row.Length)
-            {
-                if (row[index] > maxView)
-                {
-                    numView++;
-                    maxView = row[index];
-                }
-                index++;
-            }
-            return numView;
-        }
-
-        public static int[] AllView(int[,] block)
+        public static int[] GetView(int[,] block)
         {
             var result = new int[16];
 
@@ -183,77 +138,30 @@ namespace Blocks
                     col[j] = block[j, i];
                     j++;
                 }
-                result[i] = View(row);
-                result[i + 4] = View(row.Reverse().ToArray());
-                result[i + 8] = View(col);
-                result[i + 12] = View(col.Reverse().ToArray());
+                result[i] = RowView(row);
+                result[i + 4] = RowView(row.Reverse().ToArray());
+                result[i + 8] = RowView(col);
+                result[i + 12] = RowView(col.Reverse().ToArray());
                 i++;
             }
             return result;
         }
 
-        public static bool IsValidConfiguration(int[,] configuration)
+        private static int RowView(int[] row)
         {
-            int i = 0;
-            while (i < 4)
+            int numView = 0;
+            int maxView = 0;
+            int index = 0;
+            while (index < row.Length)
             {
-                int sum1 = 0;
-                int sum2 = 0;
-                int j = 0;
-                while (j < 4)
+                if (row[index] > maxView)
                 {
-                    sum1 += configuration[i, j];
-                    sum2 += configuration[j, i];
-                    j++;
+                    numView++;
+                    maxView = row[index];
                 }
-                if (sum1 != 10 || sum2 != 10)
-                    return false;
-                i++;
+                index++;
             }
-            return true;
-        }
-    }
-
-    [TestFixture]
-    public class MyTestClass
-    {
-        [Test]
-        public void Test_is_valid()
-        {
-            var config = new int[4, 4]
-            {
-                { 1, 2, 3, 4 },
-                { 2, 3, 4, 1 },
-                { 3, 4, 1, 2 },
-                { 4, 1, 2, 3 }
-            };
-            Assert.That(Program.IsValidConfiguration(config), Is.True);
-        }
-
-        [Test]
-        public void Test_is_not_valid()
-        {
-            var config = new int[4, 4]
-            {
-                { 1, 2, 3, 4 },
-                { 2, 3, 4, 1 },
-                { 3, 4, 1, 2 },
-                { 1, 3, 2, 4 }
-            };
-            Assert.That(Program.IsValidConfiguration(config), Is.False);
-        }
-
-        [Test]
-        public void Test_all_view()
-        {
-            var config = new int[4, 4]
-            {
-                { 1, 2, 3, 4 },
-                { 2, 3, 4, 1 },
-                { 3, 4, 1, 2 },
-                { 4, 1, 2, 3 }
-            };
-            Assert.That(Program.AllView(config), Is.EquivalentTo(new[] {4, 3, 2, 1, 1, 2, 2, 2, 4, 3, 2, 1, 1, 2, 2, 2 }));
+            return numView;
         }
     }
 }
